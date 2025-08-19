@@ -27,14 +27,14 @@ eta.539_raw <- read.csv("suppdata/ar539.csv") %>%
   # format date as class 'Date' 
   mutate(report_date = mdy(report_date),
          reflect_week_ending = mdy(reflect_week_ending)) %>%
-  select(-week_number, -status, -change_date)
+  select(-week_number, -status, -change_date) %>% 
+  # enforce numeric type
+  mutate(across(.cols = -c(state, report_date, reflect_week_ending), 
+                .fn = as.numeric))
 
 
 # Initial claims (NSA) ####
-eta.539_state_initial <- eta.539_raw %>% 
-  # enforce numeric type
-  mutate(across(-c(state, report_date, reflect_week_ending), 
-                ~ as.numeric(.x))) %>% 
+eta.539_state_initial <- eta.539_raw  %>% 
   # Initial Claims & Continued Claims, non seasonally adjusted (as seen here: https://oui.doleta.gov/unemploy/claims.asp) 
   # UI IC is calculated from c3 & c7 
   mutate(nsa_initial_claims = state_ui_initial_claims + stc_workshare_equivalent_initial_claims) %>% 
@@ -57,8 +57,6 @@ eta.539_state_initial <- eta.539_raw %>%
 # Continued claims (NSA) ####
 ## Disaggregate by state (wide format)
 eta.539_state_continued <- eta.539_raw %>% 
-  mutate(across(-c(state, report_date, reflect_week_ending), 
-                ~ as.numeric(.x))) %>% 
   # Initial Claims & Continued Claims, non seasonally adjusted (as seen here: https://oui.doleta.gov/unemploy/claims.asp) 
   # UI CC is calculated from c8 & c12
   mutate(nsa_continued_claims = state_ui_adjusted_continued_weeks_claimed + stc_workshare_equivalent_continued_weeks_claimed) %>% 
