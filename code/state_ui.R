@@ -1,10 +1,10 @@
 # import libraries
 library(tidyverse)
-library(data.table)
-library(lubridate)
-library(openxlsx2)
+library(data.table) # setnames(), map DOL data dictionary to the raw data
+library(lubridate) # data helper functions to recast messy data as date type
+library(openxlsx2) # mapping data and setting formatting for excel wb
 
-# Raw ETA ####
+# Prepare raw ETA ####
 ## Download ####
 # UI IC & CC (NSA) comes for ETA 539, which can be found here: https://oui.doleta.gov/unemploy/DataDownloads.asp
 # download eta 539 files with system command: https://oui.doleta.gov/unemploy/csv/ar539.csv
