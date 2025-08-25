@@ -9,12 +9,14 @@ library(openxlsx2) # mapping data and setting formatting for excel wb
 # UI IC & CC (NSA) comes for ETA 539, which can be found here: https://oui.doleta.gov/unemploy/DataDownloads.asp
 # download eta 539 files with system command: https://oui.doleta.gov/unemploy/csv/ar539.csv
 # "wget -N" omites download if data has not been updated "-P" sets the file destination"
-system(paste0("wget -N https://oui.doleta.gov/unemploy/csv/ar539.csv  -P input/"))
+system("wget -N https://oui.doleta.gov/unemploy/csv/ar539.csv  -P input/")
 
 ## Wrangle ####
 # format columns based on DOL Data Map (https://oui.doleta.gov/dmstree/handbooks/402/402_4/4024c6/4024c6.pdf#ETA203)
-# and DOL UI Handbook (https://wdr.doleta.gov/directives/attach/ETAH/ETHand401_4th_s01.pdf)
+# and DOL UI Handbook (https://www.dol.gov/sites/dolgov/files/ETA/handbooks/2017/ETHand401_5th.pdf)
 eta.539_var_names <- read.csv("input/eta539_var_names.csv")
+
+### COLLAPSE THE FILE PANEL
 
 ## Cleanse ####
 eta.539_raw <- read.csv("input/ar539.csv") |>
@@ -28,12 +30,13 @@ eta.539_raw <- read.csv("input/ar539.csv") |>
 ## Initial claims (NSA) ####
 initial_claims <- eta.539_raw  |> 
   # Initial Claims & Continued Claims, non seasonally adjusted (as seen here: https://oui.doleta.gov/unemploy/claims.asp) 
-  # UI IC is calculated from c3 & c7 
+  # UI IC is calculated from c3 (initial claims) & c7 (short time compensation workshare)
   mutate(nsa_initial_claims = state_ui_initial_claims + stc_workshare_equivalent_initial_claims) |> 
   select(state, report_date, nsa_initial_claims) |> 
   # filter out unstable reporting
   filter(report_date >= '1987-01-01') |>
   # transform into wide format - each state is own column
+  #note: https://bookdown.org/Maxine/r4ds/pivoting.html
   pivot_wider(id_cols = report_date, names_from = state, values_from = nsa_initial_claims) |> 
   # remove Puerto Rico and US Virgin Islands
   select(-PR, -VI) |> 
